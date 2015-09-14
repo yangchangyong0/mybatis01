@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--命名空间：分类管理sql隔离，方便管理-->
+<mapper namespace="com.ycy.mybatis.dao.UserMapper">
+    <!--id标示一个sql语句，一个Statement，封装为一个MapperStatement-->
+    <!--parameterType:传入参数类型;resultType:输出结果类型，指定映射的pojo-->
+    <!--#{}标示一个占位符，-->
+    <!--查询用户-->
+    <!--oracle-->
+    <!--   SELECT * FROM  USER  WHERE  username  LIKE  '%'||#{_parameter}||'%'-->
+    <!-- mysql-->
+    <select id="getUserById" parameterType="int" resultType="User">
+         SELECT  * FROM USER WHERE id=#{id}
+        </select>
+    <select id="findUserByName" parameterType="com.ycy.mybatis.module.User" resultType="com.ycy.mybatis.module.User">
+      SELECT * FROM  USER  WHERE  username  LIKE  '%${username}%'
+    </select>
+    <!--新增用户-->
+    <insert id="insertUser" parameterType="User" >
+        <!--插入值之后返回主键值-->
+        <selectKey resultType="int" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT  INTO USER  (username,birthday,sex,address) VALUES (#{username},#{birthday},#{sex},#{address})
+    </insert>
+    <!--删除用户-->
+    <delete id="deleteUser" parameterType="int">
+    DELETE  FROM USER  WHERE  id=#{id}
+    </delete>
+    <!--更新用户-->
+    <update id="updateUser" parameterType="User">
+        UPDATE USER  SET username=#{username},birthday=#{birthday},sex=#{sex},address=#{address} WHERE id=#{id}
+    </update>
+</mapper>
+

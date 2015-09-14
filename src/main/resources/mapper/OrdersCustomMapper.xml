@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--命名空间：分类管理sql隔离，方便管理-->
+<mapper namespace="com.ycy.mybatis.dao.OrdersCustomMapper">
+    <resultMap id="orderResultMap" type="orders">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="number" property="number"/>
+        <result column="createtime" property="createtime"/>
+        <result column="note" property="note"/>
+        <association property="user" javaType="user">
+            <id  column="user_id" property="id"/>
+            <result column="username" property="username"/>
+            <result column="address" property="address"/>
+        </association>
+    </resultMap>
+    <resultMap id="oderAndDetailMap" type="orders" extends="orderResultMap">
+        <!--继承订单信息与用户信息-->
+        <!--订单明细
+        ofType:集合中po类型
+        -->
+        <collection  property="orderdetails" ofType="Orderdetail">
+            <id column="orderdetail_id" property="id"/>
+            <result column="items_id" property="itemsId"/>
+            <result column="items_num" property="itemsNum"/>
+        </collection>
+    </resultMap>
+    <!--userAndDetailMap 根据用户查询订单，订单详细，商品-->
+    <resultMap id="userAndDetailMap" type="com.ycy.mybatis.module.User">
+        <!--用户信息-->
+        <id column="user_id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="sex" property="sex"/>
+        <!--订单信息-->
+        <collection property="orderlist" javaType="com.ycy.mybatis.module.Orders">
+            <id column="id" property="id"/>
+            <result column="user_id" property="userId"/>
+            <result column="number" property="number"/>
+            <result column="createtime" property="createtime"/>
+            <result column="note" property="note"/>
+            <!--订单明细-->
+            <collection property="orderdetails" javaType="com.ycy.mybatis.module.Orderdetail">
+                <id column="orderdetail_id" property="id"/>
+                <result column="items_id" property="itemsId"/>
+                <result column="items_num" property="itemsNum"/>
+                <!--商品信息-->
+                <association property="items" javaType="com.ycy.mybatis.module.Items">
+                    <id column="item_id" property="id"/>
+                    <result column="item_name" property="name"/>
+                    <result column="item_detail" property="detail"/>
+                </association>
+            </collection>
+        </collection>
+    </resultMap>
+    <!--resultType进行查询-->
+   <select id="findOrderCustomer" resultType="OrdersCustom">
+               SELECT
+          o.*,
+          u.username,
+          u.address
+        FROM
+          orders o,
+          USER u
+        WHERE o.user_id = u.id
+   </select>
+    <!--使用resultmap进行查询-->
+    <select id="findOrderResultMap" resultMap="orderResultMap">
+                       SELECT
+          o.*,
+          u.username,
+          u.address
+        FROM
+          orders o,
+          USER u
+        WHERE o.user_id = u.id
+   </select>
+    <!--根据订单联合查询用户与订单详情  一对多关联（订单与订单详情）-->
+   <select id="findOrderAndDetail" resultMap="oderAndDetailMap" >
+    SELECT
+      o.*,
+      u.username,
+      u.address ,
+      d.id orderdetail_id,
+      d.items_id,
+      d.items_num
+    FROM
+      orders o,
+      USER u ,
+      orderdetail d
+    WHERE o.user_id = u.id
+    AND d.orders_id=o.id
+   </select>
+
+    <!--根据用户单联合查询用户与订单详情  一对多关联（订单与订单详情）-->
+    <select id="findUserAndDetail" resultMap="userAndDetailMap" >
+        SELECT
+        o.*,
+        u.username,
+        u.address ,
+        d.id orderdetail_id,
+        d.items_id,
+        d.items_num
+        FROM
+        orders o,
+        USER u ,
+        orderdetail d
+        WHERE o.user_id = u.id
+        AND d.orders_id=o.id
+    </select>
+    <!--查询订单  一对多关联（订单与订单详情）-->
+    <select id="findOrderAndUserLazyLoding" resultMap="orderAndUserLazyLodingMap" >
+        SELECT
+        o.*
+        FROM
+        orders o
+    </select>
+    <!--查询订单-用户 延迟加载  一对多关联（订单与订单详情）-->
+    <resultMap id="orderAndUserLazyLodingMap" type="com.ycy.mybatis.module.Orders">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="number" property="number"/>
+        <result column="createtime" property="createtime"/>
+        <result column="note" property="note"/>
+        <association property="user" select="com.ycy.mybatis.dao.UserMapper.getUserById" column="user_id">
+        </association>
+    </resultMap>
+</mapper>

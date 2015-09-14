@@ -1,0 +1,54 @@
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--配置属性值，可以在属性文件内编写属性值，也可以在properties标签里面写属性值-->
+    <properties resource="config/db.properties">
+      <!--  <property name="" value=""></property>-->
+    </properties>
+
+    <!-- 全局配置参数 -->
+    <settings>
+        <!-- 延迟加载总开关 -->
+        <setting name="lazyLoadingEnabled" value="true" />
+        <!-- 设置按需加载 -->
+        <setting name="aggressiveLazyLoading" value="false" />
+        <!-- 二级缓存总开关 -->
+        <setting name="cacheEnabled" value="true"></setting>
+    </settings>
+    
+    <typeAliases>
+        <!--别名定义1：指定单个路径定义别名（不常用）-->
+      <!--  <typeAlias type="com.ycy.mybatis.module.User" alias="User"/>-->
+        <!--别名定义2：指定包路径，默认为类的名字（首字母大小写都可以，建议大写）-->
+        <package name="com.ycy.mybatis.module" />
+    </typeAliases>
+
+    <!--与spring整个后环境配置将废除-->
+    <environments default="development">
+        <environment id="development">
+            <!--使用JDBC事务管理-->
+            <transactionManager type="JDBC"></transactionManager>
+            <!--数据库连接池-->
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    
+    <!--加载mapper-->
+    <mappers>
+        <!--如果和spring整合，可以使用整合包的 mapper扫描器，此处mapper配置不需要；-->
+        <!--1:通过resource路径导入xml映射（idea必须在resource文件下面）-->
+        <mapper  resource="mapper/UserMapper.xml"/>
+        <mapper  resource="mapper/OrdersCustomMapper.xml"/>
+        <!--2:通过class路径导入映射，注意：此时class文件必须与想xml文件在一个目录下，同名-->
+      <!--  <mapper class="com.ycy.mybatis.dao.UserMapper" />-->
+        <!--3:通过批量导入package，自动扫描包下面mapper接口 注意：此时class文件必须与想xml文件在一个目录下,同名-->
+        <!--<package name="com.ycy.mybatis.dao"/>-->
+    </mappers>
+</configuration>

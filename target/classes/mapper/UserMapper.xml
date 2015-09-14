@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--命名空间：分类管理sql隔离，方便管理-->
+<mapper namespace="com.ycy.mybatis.dao.UserMapper">
+    <!--打开mapper二级缓存开关-->
+    <cache type="org.mybatis.caches.ehcache.EhcacheCache">
+        <property name="maxElementsInMemory" value="1000"/>
+    </cache>
+    <!--定义个ResultMap-->
+    <!--如果ResultMap定义在一个mapper.xml里面，直接使用resultMap的id ,如果不在同一个mapper要在resultMap前面加namespace-->
+    <resultMap id="userResultMap" type="User">
+        <id column="id" property="id" />
+        <result column="username" property="username" />
+        <result column="birthday" property="birthday"/>
+        <result column="sex" property="sex" />
+        <result column="address" property="address"/>
+    </resultMap>
+    <!--id标示一个sql语句，一个Statement，封装为一个MapperStatement-->
+    <!--parameterType:传入参数类型;resultType:输出结果类型，指定映射的pojo-->
+    <!--#{}标示一个占位符，-->
+    <!--查询用户-->
+    <!--oracle-->
+    <!--   SELECT * FROM  USER  WHERE  username  LIKE  '%'||#{_parameter}||'%'-->
+    <!-- mysql-->
+    <select id="getUserById" parameterType="int" resultType="User" >
+         SELECT  * FROM USER WHERE id=#{id}
+        </select>
+    <select id="findUserByName" parameterType="com.ycy.mybatis.module.User" resultType="com.ycy.mybatis.module.User">
+      SELECT * FROM  USER  WHERE  username  LIKE  '%${username}%'
+    </select>
+    <!--新增用户-->
+    <insert id="insertUser" parameterType="User" flushCache="true">
+        <!--插入值之后返回主键值-->
+        <selectKey resultType="int" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT  INTO USER  (username,birthday,sex,address) VALUES (#{username},#{birthday},#{sex},#{address})
+    </insert>
+    <!--删除用户-->
+    <delete id="deleteUser" parameterType="int">
+    DELETE  FROM USER  WHERE  id=#{id}
+    </delete>
+    <!--更新用户-->
+    <update id="updateUser" parameterType="User">
+        UPDATE USER  SET username=#{username},birthday=#{birthday},sex=#{sex},address=#{address} WHERE id=#{id}
+    </update>
+    <select id="findUserResultMap" parameterType="user" resultMap="userResultMap">
+    SELECT * FROM  USER
+    <where>
+        <include refid="query_user_where"/>
+    </where>
+</select>
+    <!--sql查询片段-->
+    <sql id="query_user_where" >
+        <if test="username!=null and username!=''">
+            AND  username  LIKE  '%${username}%'
+        </if>
+        <if test="sex!=null and sex!=''">
+            AND  sex  =#{sex}
+        </if>
+
+    </sql>
+
+</mapper>
